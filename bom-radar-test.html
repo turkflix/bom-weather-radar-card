@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOM Radar Test - Melbourne VIC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .container {
+            text-align: center;
+        }
+        
+        .radar-display {
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #000;
+            margin: 20px 0;
+            padding: 20px;
+        }
+        
+        .radar-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .frame-info {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .status.loading {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .status.success {
+            background: #28a745;
+        }
+        
+        .status.error {
+            background: #dc3545;
+        }
+        
+        .metadata {
+            text-align: left;
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .api-info {
+            font-family: monospace;
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌦️ BOM Radar Test</h1>
+        <h2>Melbourne, VIC</h2>
+        
+        <div class="api-info">
+            API Call: <strong>GET http://192.168.86.62:8082/api/radar/melbourne/vic</strong>
+        </div>
+        
+        <div id="status" class="status loading">Loading radar data...</div>
+        
+        <div class="radar-display">
+            <img id="radarImage" class="radar-image" alt="Radar Image" style="display: none;">
+            <div id="loadingText">📡 Fetching radar data...</div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn" onclick="previousFrame()" disabled>⏮️ Previous</button>
+            <button id="playBtn" onclick="togglePlay()">▶️ Play</button>
+            <button id="nextBtn" onclick="nextFrame()" disabled>⏭️ Next</button>
+            <button onclick="refresh()">🔄 Refresh</button>
+        </div>
+        
+        <div class="frame-info" id="frameInfo">Frame: - / -</div>
+        
+        <div class="metadata" id="metadata" style="display: none;">
+            <h3>📊 Radar Metadata</h3>
+            <div id="metadataContent"></div>
+        </div>
+        
+        <div class="metadata">
+            <h3>🔧 Debug Info</h3>
+            <div id="debugInfo">
+                <div><strong>Test Purpose:</strong> Prove BOM Local Service works</div>
+                <div><strong>Expected Result:</strong> Melbourne area radar images</div>
+                <div><strong>Service Version:</strong> v1.0.0-original</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let radarData = null;
+        let currentFrame = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        
+        const SERVICE_URL = 'http://192.168.86.62:8082';
+        const API_ENDPOINT = `${SERVICE_URL}/api/radar/melbourne/vic`;
+        
+        // Load radar data on page load
+        window.addEventListener('load', loadRadarData);
+        
+        async function loadRadarData() {
+            try {
+                updateStatus('Loading radar data...', 'loading');
+                
+                console.log('Fetching from:', API_ENDPOINT);
+                const response = await fetch(API_ENDPOINT);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (data.errorCode || data.error) {
+                    throw new Error(data.message || data.error || 'API returned error');
+                }
+                
+                if (!data.frames || data.frames.length === 0) {
+                    throw new Error('No radar frames available');
+                }
+                
+                radarData = data;
+                currentFrame = data.frames.length - 1; // Start with latest frame
+                
+                updateStatus(`✅ Loaded ${data.frames.length} radar frames`, 'success');
+                displayCurrentFrame();
+                updateControls();
+                showMetadata();
+                
+            } catch (error) {
+                console.error('Error loading radar data:', error);
+                updateStatus(`❌ Error: ${error.message}`, 'error');
+                
+                // Add debug info for troubleshooting
+                const debugDiv = document.getElementById('debugInfo');
+                debugDiv.innerHTML += `<div style="color: #ff6b6b; margin-top: 10px;"><strong>Error Details:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        function displayCurrentFrame() {
+            if (!radarData || !radarData.frames) return;
+            
+            const frame = radarData.frames[currentFrame];
+            const img = document.getElementById('radarImage');
+            const loadingText = document.getElementById('loadingText');
+            
+            if (frame && frame.imageUrl) {
+                const imageUrl = frame.imageUrl.startsWith('http') 
+                    ? frame.imageUrl 
+                    : `${SERVICE_URL}${frame.imageUrl}`;
+                
+                img.src = imageUrl;
+                img.style.display = 'block';
+                loadingText.style.display = 'none';
+                
+                console.log('Displaying frame:', imageUrl);
+            }
+            
+            updateFrameInfo();
+        }
+        
+        function updateFrameInfo() {
+            if (!radarData) return;
+            
+            const frameInfo = document.getElementById('frameInfo');
+            const frame = radarData.frames[currentFrame];
+            
+            let infoText = `Frame: ${currentFrame + 1} / ${radarData.frames.length}`;
+            
+            if (frame && frame.observationTime) {
+                const time = new Date(frame.observationTime).toLocaleString();
+                infoText += ` | Time: ${time}`;
+            }
+            
+            frameInfo.textContent = infoText;
+        }
+        
+        function showMetadata() {
+            if (!radarData) return;
+            
+            const metadataDiv = document.getElementById('metadata');
+            const contentDiv = document.getElementById('metadataContent');
+            
+            let html = '';
+            
+            if (radarData.weatherStation) html += `<div><strong>Weather Station:</strong> ${radarData.weatherStation}</div>`;
+            if (radarData.distance) html += `<div><strong>Distance:</strong> ${radarData.distance}</div>`;
+            if (radarData.observationTime) html += `<div><strong>Observation Time:</strong> ${new Date(radarData.observationTime).toLocaleString()}</div>`;
+            if (radarData.lastUpdated) html += `<div><strong>Last Updated:</strong> ${new Date(radarData.lastUpdated).toLocaleString()}</div>`;
+            
+            html += `<div><strong>Cache Valid:</strong> ${radarData.cacheIsValid ? '✅ Yes' : '❌ No'}</div>`;
+            html += `<div><strong>Total Frames:</strong> ${radarData.frames.length}</div>`;
+            
+            contentDiv.innerHTML = html;
+            metadataDiv.style.display = 'block';
+        }
+        
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        function updateControls() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentFrame <= 0;
+            nextBtn.disabled = currentFrame >= (radarData?.frames.length - 1);
+        }
+        
+        function previousFrame() {
+            if (currentFrame > 0) {
+                currentFrame--;
+                displayCurrentFrame();
+                updateControls();
+            }
+        }
+        
+        function nextFrame() {
+            if (radarData && currentFrame < radarData.frames.length - 1) {
+                currentFrame++;
+                displayCurrentFrame();
+                updateControls();
+            }
+        }
+        
+        function togglePlay() {
+            const playBtn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                clearInterval(playInterval);
+                isPlaying = false;
+                playBtn.textContent = '▶️ Play';
+            } else {
+                isPlaying = true;
+                playBtn.textContent = '⏸️ Pause';
+                playInterval = setInterval(() => {
+                    nextFrame();
+                    if (currentFrame >= radarData.frames.length - 1) {
+                        currentFrame = 0; // Loop back to start
+                        displayCurrentFrame();
+                        updateControls();
+                    }
+                }, 1000); // 1 second per frame
+            }
+        }
+        
+        function refresh() {
+            // Stop playing if active
+            if (isPlaying) togglePlay();
+            
+            // Reset display
+            document.getElementById('radarImage').style.display = 'none';
+            document.getElementById('loadingText').style.display = 'block';
+            document.getElementById('metadata').style.display = 'none';
+            
+            // Reload data
+            loadRadarData();
+        }
+    </script>
+</body>
+</html>
