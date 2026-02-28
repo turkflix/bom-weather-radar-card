@@ -3450,11 +3450,9 @@ __decorate([
     r$1()
 ], BomLocalRadarCard.prototype, "isExtendedMode", void 0);
 BomLocalRadarCard = __decorate([
-    t$1('bom-local-card')
+    t$1('bom-weather-radar-card')
 ], BomLocalRadarCard);
-if (!customElements.get('bom-weather-radar-card')) {
-    customElements.define('bom-weather-radar-card', BomLocalRadarCard);
-}
+// Custom element is registered via @customElement decorator above
 
 export { BomLocalRadarCard };
 //# sourceMappingURL=bom-weather-radar-card.js.map

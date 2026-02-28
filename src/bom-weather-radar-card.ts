@@ -41,7 +41,7 @@ window.customCards.push({
   description: 'A rain radar card using the local BOM service',
 });
 
-@customElement('bom-local-card')
+@customElement('bom-weather-radar-card')
 export class BomLocalRadarCard extends LitElement implements LovelaceCard {
   static override styles: CSSResultGroup = [
     cardStyles,
@@ -721,9 +721,7 @@ export class BomLocalRadarCard extends LitElement implements LovelaceCard {
   }
 }
 
-if (!customElements.get('bom-weather-radar-card')) {
-  customElements.define('bom-weather-radar-card', BomLocalRadarCard);
-}
+// Custom element is registered via @customElement decorator above
 
 
 
