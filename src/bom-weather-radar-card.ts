@@ -721,8 +721,8 @@ export class BomLocalRadarCard extends LitElement implements LovelaceCard {
   }
 }
 
-if (!customElements.get('bom-local-card')) {
-  customElements.define('bom-local-card', BomLocalRadarCard);
+if (!customElements.get('bom-weather-radar-card')) {
+  customElements.define('bom-weather-radar-card', BomLocalRadarCard);
 }
 
 

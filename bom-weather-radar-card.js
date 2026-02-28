@@ -3452,8 +3452,8 @@ __decorate([
 BomLocalRadarCard = __decorate([
     t$1('bom-local-card')
 ], BomLocalRadarCard);
-if (!customElements.get('bom-local-card')) {
-    customElements.define('bom-local-card', BomLocalRadarCard);
+if (!customElements.get('bom-weather-radar-card')) {
+    customElements.define('bom-weather-radar-card', BomLocalRadarCard);
 }
 
 export { BomLocalRadarCard };
