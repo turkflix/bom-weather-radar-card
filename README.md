@@ -26,7 +26,15 @@
    - Category: Frontend
    - Click "Install"
 
-2. **Add to Dashboard:**
+2. **Add to Dashboard (Minimal - Clean Radar Only):**
+   ```yaml
+   type: custom:bom-weather-radar-card
+   suburb: ashburton
+   state: VIC
+   service_url: http://YOUR_SERVICE_IP:8082
+   ```
+
+3. **Full Configuration (All Options):**
    ```yaml
    type: custom:bom-weather-radar-card
    suburb: melbourne
@@ -34,11 +42,21 @@
    service_url: http://YOUR_SERVICE_IP:8082
    card_title: Local Weather Radar
    show_metadata: true
+   show_controls: true
    timespan: latest
    frame_interval: 2
    auto_play: true
    refresh_interval: 30
    ```
+
+## 🎯 Minimal by Default
+
+This card is designed for **clean, minimal radar display**:
+- ✅ **No controls shown** by default (auto-play enabled)
+- ✅ **No metadata** shown by default  
+- ✅ **Just the radar map** with smooth animation
+- ✅ **Set `show_controls: true`** to show playback controls
+- ✅ **Set `show_metadata: true`** to show weather station info
 
 ## 📊 Configuration Options
 
@@ -47,8 +65,9 @@
 | `suburb` | string | **Required** | Suburb name (e.g., "melbourne") |
 | `state` | string | **Required** | State abbreviation (e.g., "VIC") |
 | `service_url` | string | **Required** | BOM Local Service URL |
-| `card_title` | string | `"BOM Radar"` | Card header title |
-| `show_metadata` | boolean | `true` | Show weather station info |
+| `card_title` | string | `(none)` | Card header title (hidden by default) |
+| `show_metadata` | boolean | `false` | Show weather station info |
+| `show_controls` | boolean | `false` | Show playback controls |
 | `timespan` | string | `"latest"` | Time range (`latest`, `1h`, `3h`, `6h`, `12h`, `24h`, `custom`) |
 | `frame_interval` | number | `2.0` | Seconds between frames in slideshow |
 | `auto_play` | boolean | `true` | Start slideshow automatically |

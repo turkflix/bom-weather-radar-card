@@ -2988,7 +2988,7 @@ let BomLocalRadarCard = class BomLocalRadarCard extends i {
     _getMetadataConfig() {
         const showMetadata = this._config.show_metadata;
         if (showMetadata === undefined) {
-            return true; // Default: show all metadata
+            return false; // Default: minimal display - hide metadata
         }
         return showMetadata;
     }
@@ -2998,7 +2998,7 @@ let BomLocalRadarCard = class BomLocalRadarCard extends i {
     _getControlsConfig() {
         const showControls = this._config.show_controls;
         if (showControls === undefined) {
-            return true; // Default: show all controls
+            return false; // Default: minimal display - hide controls (auto-play enabled)
         }
         return showControls;
     }

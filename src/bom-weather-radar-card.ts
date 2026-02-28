@@ -222,7 +222,7 @@ export class BomLocalRadarCard extends LitElement implements LovelaceCard {
   private _getMetadataConfig(): boolean | MetadataDisplayConfig | undefined {
     const showMetadata = this._config.show_metadata;
     if (showMetadata === undefined) {
-      return true; // Default: show all metadata
+      return false; // Default: minimal display - hide metadata
     }
     return showMetadata;
   }
@@ -233,7 +233,7 @@ export class BomLocalRadarCard extends LitElement implements LovelaceCard {
   private _getControlsConfig(): boolean | ControlsDisplayConfig | undefined {
     const showControls = this._config.show_controls;
     if (showControls === undefined) {
-      return true; // Default: show all controls
+      return false; // Default: minimal display - hide controls (auto-play enabled)
     }
     return showControls;
   }
